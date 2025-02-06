@@ -15,23 +15,25 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+import static com.compiler.wan.api.config.JCompileConfig.*;
+
 @Service
 @Slf4j
 public class CompilerServiceImpl implements CompilerService {
     @Override
     public ExecutionContent compileCode(ExecutionContent executionContent) {
 
-        Path defaultPath = Paths.get("tmp"); //TODO: property 처리
+        Path defaultPath = Paths.get(DEFAULT_PATH.getVal()); //TODO: property 처리
 
         try {
 
-            String tmpDict = "tmp_"+ UUID.randomUUID().toString(); //TODO: 상수처리
+            String tmpDict = DICT_PREFIX.getVal()+ UUID.randomUUID().toString();
             Path tmpPath = defaultPath.resolve(tmpDict);
             Files.createDirectories(tmpPath);
 
 
             // 임시 파일에 Java 소스 저장
-            Path tempSourceFile = tmpPath.resolve("Main.java"); //TODO: 상수처리
+            Path tempSourceFile = tmpPath.resolve(MAIN_FILE.getVal());
             log.info("fileName: " + tempSourceFile.getFileName().toString());
 
             Files.write(tempSourceFile, executionContent.getCode().getBytes());
@@ -83,7 +85,7 @@ public class CompilerServiceImpl implements CompilerService {
 
             //클래스 실행
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    "java", "-cp", classFilePath.toString(), "Main"); //TODO: 상수처리
+                    JAVA.getVal(), CP.getVal(), classFilePath.toString(), MAIN.getVal());
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
 
