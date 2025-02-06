@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ExecutionResult {
+public class ExecutionContent {
 
     /*
     상태 값 분류 -> Enum 처리
@@ -18,10 +18,13 @@ public class ExecutionResult {
 
     결과값
     성공의 경우 출력값, 그 외의 경우 에러메세지
+
+    실행시킨 코드
      */
 
     private ExecutionStatus status;
     private String compilePath;
     private String message;
+    private String code;
 
 }
