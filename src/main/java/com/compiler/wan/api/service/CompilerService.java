@@ -1,11 +1,11 @@
 package com.compiler.wan.api.service;
 
-import com.compiler.wan.api.domain.ExecutionResult;
+import com.compiler.wan.api.domain.ExecutionContent;
 
 public interface CompilerService {
 
-    public ExecutionResult compileCode(String code);
+    public ExecutionContent compileCode(String code);
 
-    public ExecutionResult runCode(ExecutionResult executionResult);
+    public ExecutionContent runCode(ExecutionContent executionContent);
 
 }
