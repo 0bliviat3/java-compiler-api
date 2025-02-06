@@ -21,11 +21,11 @@ public class CompilerServiceImpl implements CompilerService {
     @Override
     public ExecutionContent compileCode(ExecutionContent executionContent) {
 
-        Path defaultPath = Paths.get("tmp");
+        Path defaultPath = Paths.get("tmp"); //TODO: property 처리
 
         try {
 
-            String tmpDict = "tmp_"+ UUID.randomUUID().toString();
+            String tmpDict = "tmp_"+ UUID.randomUUID().toString(); //TODO: 상수처리
             Path tmpPath = defaultPath.resolve(tmpDict);
             Files.createDirectories(tmpPath);
 
@@ -63,8 +63,6 @@ public class CompilerServiceImpl implements CompilerService {
                 }
                 executionContent.setMessage(errorMessages.toString());
             }
-
-            // Files.delete(tempSourceFile);
 
         } catch (Exception e) {
             executionContent.setStatus(ExecutionStatus.SERVER_ERROR);
@@ -109,9 +107,6 @@ public class CompilerServiceImpl implements CompilerService {
             }
         } catch (Exception e) {
             executionContent.setStatus(ExecutionStatus.SERVER_ERROR);
-
-            log.info("run server error");
-
             executionContent.setMessage(e.getMessage());
         }
 
