@@ -8,4 +8,6 @@ public interface CompilerService {
 
     public ExecutionContent runCode(ExecutionContent executionContent);
 
+    public void deleteTmpFile(ExecutionContent executionContent);
+
 }

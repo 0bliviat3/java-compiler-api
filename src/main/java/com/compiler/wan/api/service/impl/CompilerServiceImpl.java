@@ -8,11 +8,13 @@ import org.springframework.stereotype.Service;
 
 import javax.tools.*;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.compiler.wan.api.config.JCompileConfig.*;
@@ -112,9 +114,19 @@ public class CompilerServiceImpl implements CompilerService {
             executionContent.setMessage(e.getMessage());
         }
 
-        //TODO: 임시 디렉토리 삭제
-
+        deleteTmpFile(executionContent);
 
         return executionContent;
+    }
+
+    @Override
+    public void deleteTmpFile(ExecutionContent executionContent) {
+        File targetDict = new File(executionContent.getCompilePath());
+
+        for (File f : Objects.requireNonNull(targetDict.listFiles())) {
+            f.delete();
+        }
+
+        targetDict.delete();
     }
 }
