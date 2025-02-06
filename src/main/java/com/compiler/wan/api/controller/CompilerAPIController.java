@@ -24,11 +24,11 @@ public class CompilerAPIController {
     }
 
     @PostMapping("/compile")
-    public ExecutionContent compileCode(@RequestBody ExecutionContent target) {
+    public ExecutionContent compileCode(@RequestBody ExecutionContent content) {
 
-        log.info("code: " + target.getCode());
+        log.info("code: " + content.getCode());
 
-        ExecutionContent result = compilerService.compileCode(target.getCode());
+        ExecutionContent result = compilerService.compileCode(content);
 
         if (isERROR(result.getStatus())) {
             log.info("compile ERROR");

@@ -19,11 +19,9 @@ import java.util.UUID;
 @Slf4j
 public class CompilerServiceImpl implements CompilerService {
     @Override
-    public ExecutionContent compileCode(String code) {
+    public ExecutionContent compileCode(ExecutionContent executionContent) {
 
         Path defaultPath = Paths.get("tmp");
-
-        ExecutionContent result = new ExecutionContent();
 
         try {
 
@@ -36,7 +34,7 @@ public class CompilerServiceImpl implements CompilerService {
             Path tempSourceFile = tmpPath.resolve("Main.java"); //TODO: 상수처리
             log.info("fileName: " + tempSourceFile.getFileName().toString());
 
-            Files.write(tempSourceFile, code.getBytes());
+            Files.write(tempSourceFile, executionContent.getCode().getBytes());
 
             // 컴파일러 설정
             JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
@@ -54,26 +52,26 @@ public class CompilerServiceImpl implements CompilerService {
             fileManager.close();
 
             if (isSuccess) {
-                result.setCompilePath(tmpPath.toString());
+                executionContent.setCompilePath(tmpPath.toString());
             } else {
-                result.setStatus(ExecutionStatus.COMPILE_ERROR);
+                executionContent.setStatus(ExecutionStatus.COMPILE_ERROR);
 
                 // 컴파일 오류 처리
                 StringBuilder errorMessages = new StringBuilder();
                 for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
                     errorMessages.append(diagnostic.getMessage(null)).append("\n");
                 }
-                result.setMessage(errorMessages.toString());
+                executionContent.setMessage(errorMessages.toString());
             }
 
             // Files.delete(tempSourceFile);
 
         } catch (Exception e) {
-            result.setStatus(ExecutionStatus.SERVER_ERROR);
-            result.setMessage(e.getMessage());
+            executionContent.setStatus(ExecutionStatus.SERVER_ERROR);
+            executionContent.setMessage(e.getMessage());
         }
 
-        return result;
+        return executionContent;
     }
 
     @Override
