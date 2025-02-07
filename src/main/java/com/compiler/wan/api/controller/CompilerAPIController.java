@@ -26,6 +26,11 @@ public class CompilerAPIController {
     @PostMapping("/compile")
     public ExecutionContent compileCode(@RequestBody ExecutionContent content) {
 
+        //TODO: 권한체크 필요
+        /*
+        권한에 따라서 admin 인경우 memory 크기,시간제한 설정 가능하도록 수정
+         */
+
         log.info("code: " + content.getCode());
 
         ExecutionContent result = compilerService.compileCode(content);
