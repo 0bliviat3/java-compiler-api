@@ -4,6 +4,7 @@ public enum ExecutionStatus {
     SUCCESS,
     COMPILE_ERROR,
     SERVER_ERROR,
+    TIME_OUT,
     EXCEPTION;
 
     public static boolean isERROR(ExecutionStatus status) {

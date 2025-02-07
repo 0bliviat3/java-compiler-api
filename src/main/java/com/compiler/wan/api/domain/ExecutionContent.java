@@ -26,5 +26,7 @@ public class ExecutionContent {
     private String compilePath;
     private String message;
     private String code;
+    private Integer maxMemory;
+    private Integer maxTime;
 
 }

@@ -15,7 +15,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static com.compiler.wan.api.config.JCompileConfig.*;
 
@@ -28,11 +30,9 @@ public class CompilerServiceImpl implements CompilerService {
         Path defaultPath = Paths.get(DEFAULT_PATH.getVal()); //TODO: property 처리
 
         try {
-
             String tmpDict = DICT_PREFIX.getVal()+ UUID.randomUUID().toString();
             Path tmpPath = defaultPath.resolve(tmpDict);
             Files.createDirectories(tmpPath);
-
 
             // 임시 파일에 Java 소스 저장
             Path tempSourceFile = tmpPath.resolve(MAIN_FILE.getVal());
@@ -63,7 +63,9 @@ public class CompilerServiceImpl implements CompilerService {
                 // 컴파일 오류 처리
                 StringBuilder errorMessages = new StringBuilder();
                 for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
-                    errorMessages.append(diagnostic.getMessage(null)).append("\n");
+                    errorMessages
+                            .append(diagnostic.getMessage(null))
+                            .append(System.lineSeparator());
                 }
                 executionContent.setMessage(errorMessages.toString());
             }
@@ -84,10 +86,15 @@ public class CompilerServiceImpl implements CompilerService {
         log.info(classFilePath.toString());
 
         try {
-
             //클래스 실행
             ProcessBuilder processBuilder = new ProcessBuilder(
-                    JAVA.getVal(), CP.getVal(), classFilePath.toString(), MAIN.getVal());
+                    JAVA.getVal(),
+                    String.format(XMX.getVal(),
+                            Optional.ofNullable(executionContent.getMaxMemory())
+                            .orElse(Integer.parseInt(DEFAULT_MEMORY.getVal()))),
+                    CP.getVal(), classFilePath.toString(),
+                    MAIN.getVal()
+            );
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
 
@@ -96,18 +103,28 @@ public class CompilerServiceImpl implements CompilerService {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             StringBuilder output = new StringBuilder();
             String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
-            }
 
-            int exitCode = process.waitFor();
+            boolean isFinish = process.waitFor(
+                    Optional.ofNullable(executionContent.getMaxTime())
+                            .orElse(Integer.parseInt(DEFAULT_TIME.getVal())), TimeUnit.SECONDS);
 
-            executionContent.setMessage(output.toString());
+            if (isFinish) {
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append("\n");
+                }
 
-            if (exitCode == 0) {
-                executionContent.setStatus(ExecutionStatus.SUCCESS);
+                int exitCode = process.waitFor();
+
+                executionContent.setMessage(output.toString());
+
+                if (exitCode == 0) {
+                    executionContent.setStatus(ExecutionStatus.SUCCESS);
+                } else {
+                    executionContent.setStatus(ExecutionStatus.EXCEPTION);
+                }
             } else {
-                executionContent.setStatus(ExecutionStatus.EXCEPTION);
+                executionContent.setStatus(ExecutionStatus.TIME_OUT);
+                process.destroy();
             }
         } catch (Exception e) {
             executionContent.setStatus(ExecutionStatus.SERVER_ERROR);
