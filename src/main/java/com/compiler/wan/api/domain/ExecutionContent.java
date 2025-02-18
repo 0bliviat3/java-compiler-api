@@ -1,8 +1,10 @@
 package com.compiler.wan.api.domain;
 
 import com.compiler.wan.api.config.ExecutionStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 
 /*
@@ -28,5 +30,8 @@ public class ExecutionContent {
     private String code;
     private Integer maxMemory;
     private Integer maxTime;
+
+    @JsonIgnore
+    private MultipartFile inputFile;
 
 }
