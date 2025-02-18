@@ -30,5 +30,13 @@ docker pull 0bliviate/java-compiler-api:main
 }
 ```
 
+### api params
+```
+    code: your source code
+    maxMemory: set memory
+    maxTime: set max time
+    inputFile: set input (if you use inputStream)
+```
+
 ## contact
 If you have any questions, please raise an issue or contact me at sjo9810@naver.com
