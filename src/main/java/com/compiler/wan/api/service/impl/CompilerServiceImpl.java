@@ -7,10 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.tools.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,7 +24,7 @@ public class CompilerServiceImpl implements CompilerService {
     @Override
     public ExecutionContent compileCode(ExecutionContent executionContent) {
 
-        Path defaultPath = Paths.get(DEFAULT_PATH.getVal()); //TODO: property 처리
+        Path defaultPath = Paths.get(DEFAULT_PATH.getVal());
 
         try {
             String tmpDict = DICT_PREFIX.getVal()+ UUID.randomUUID().toString();
@@ -98,6 +95,11 @@ public class CompilerServiceImpl implements CompilerService {
             processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
 
+            // 입력처리
+            if (executionContent.getInputFile() != null) {
+                readFile(executionContent, process);
+            }
+
             // 실행 결과 읽기
             InputStream inputStream = process.getInputStream();
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -113,7 +115,7 @@ public class CompilerServiceImpl implements CompilerService {
                     output.append(line).append("\n");
                 }
 
-                int exitCode = process.waitFor();
+                int exitCode = process.exitValue();
 
                 executionContent.setMessage(output.toString());
 
@@ -134,6 +136,19 @@ public class CompilerServiceImpl implements CompilerService {
         deleteTmpFile(executionContent);
 
         return executionContent;
+    }
+
+    private void readFile(ExecutionContent executionContent, Process process) throws IOException {
+        OutputStream processOutputStream = process.getOutputStream();
+        InputStream inputFileStream = executionContent.getInputFile().getInputStream();
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = inputFileStream.read(buffer)) != -1) {
+            processOutputStream.write(buffer, 0, length);
+        }
+        processOutputStream.flush();
+        inputFileStream.close();
+        processOutputStream.close();
     }
 
     @Override
